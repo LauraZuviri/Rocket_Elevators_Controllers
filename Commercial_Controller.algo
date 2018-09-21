@@ -28,35 +28,25 @@ SEQUENCE SelectSectionFloor (Direction, Section, Floor)
  END FOR
 END SEQUENCE
 
-SEQUENCE FindBestElevatorFromSelectedSectionFromLobby (DirectionUp, Section) RETURNING ElevatorNumber
+SEQUENCE FindBestElevatorFromSelectedSectionFromLobby (Direction, Section) RETURNING ElevatorNumber
   WHILE SectionElevator NOT FOUND
     FOR EACH Elevator IN Elevators
-         IF Floor IS Lobby AND Status Is Stopped OR Idle THEN
-          RETURN Elevator
-         ELSE 
-          DO Nothing
-       END IF
+      READ FloorList
+         IF Floor IS Lobby THEN
+          IF Status Is Stopped AND TotalListEntry < 7 THEN
+           RETURN Elevator
+          ELSE IF Status IS Idle THEN
+           RETURN Elevator
+          END IF
+         ELSE IF ElevatorFloor > Lobby THEN
+          IF Elevator IS GoingDown THEN
+            RETURN Elevator
+          ELSE IF Elevator IS GoingUP AND TotalListEntry < 7 THEN
+            RETURN Elevator
+         END IF
      END FOR
-         READ SectionElevator WITH ShortestList FloorList FROM SectionElevators
   END WHILE
 END SEQUENCE
-
-SEQUENCE FindBestElevatorFromSelectedSectionFromFloor (DirectionDown, Section) RETURNING ElevatorNumber
-  WHILE SectionElevator NOT FOUND
-    FOR EACH Elevator IN Elevators
-         IF Floor IS > Lobby AND Status IS Stopped THEN
-          RETURN Elevator
-         ELSE IF Elevator.Status IS Idle THEN
-          RETURN Elevator
-         ELSE IF Elevator IS GoingUp THEN
-          DO Nothing
-       END IF
-     END FOR
-         READ SectionElevator WITH ShortestList FloorList FROM SectionElevators
-  END WHILE
-END SEQUENCE
-
-
 
 SEQUENCE AddDestinationFloorToElevatorFloorList(ElevatorNumber, Floor)
   ADD Floor to SectionElevatorFloorList(ElevatorNumber)
