@@ -1,0 +1,157 @@
+PSEUDO-CODE Commercial
+
+section 1 = basements 6 + RC 3 elevators
+section 2 = Lobby + 19 floors 3 elevators
+section 3 = Lobby + 21 floors 3 elevators
+section 4 = Lobby + 21 floors 3 elevators
+
+SEQUENCE UserInsertFloorNeededInScreenFloor (Floor)
+    CALL ActivateSectionOfFloorSelected (Floor) RETURNING Section
+    CALL FindBestElevatorFromSelectedSection (Section, Floor) RETURNING ElevatorNumber
+    CALL AddDestinationFloorToSelectedSectionElevatorFloorList (ElevatorNumber, Floor)
+END SEQUENCE
+
+SEQUENCE ActivateSectionOfFloorSelected (Direction, Section, Floor)
+   CALL SelectSectionFloor (Direction, Section, Floor) RETURNING Section
+END SEQUENCE
+
+SEQUENCE SelectSectionFloor (Direction, Section, Floor)
+ FOR EACH Section IN Sections
+    IF SectionFloor IS < THAN Lobby THEN
+     RETURN Section 1
+    ELSE IF SectionFloor IS > Lobby AND < 19 Floors THEN
+     RETURN Section 2
+    ELSE IF SectionFloor IS > Lobby AND > THAN 19 Floors AND < THAN 40 Floors THEN
+     RETURN Section 3
+    ELSE IF SectionFloor IS > Lobby AND > 19 Floors AND > THAN 40 Floors AND = OR < THAN 60 THEN
+     RETURN Section 4
+ END FOR
+END SEQUENCE
+
+SEQUENCE FindBestElevatorFromSelectedSectionFromLobby (DirectionUp, Section) RETURNING ElevatorNumber
+  WHILE SectionElevator NOT FOUND
+    FOR EACH Elevator IN Elevators
+         IF Floor IS Lobby AND Status Is Stopped OR Idle THEN
+          RETURN Elevator
+         ELSE 
+          DO Nothing
+       END IF
+     END FOR
+         READ SectionElevator WITH ShortestList FloorList FROM SectionElevators
+  END WHILE
+END SEQUENCE
+
+SEQUENCE FindBestElevatorFromSelectedSectionFromFloor (DirectionDown, Section) RETURNING ElevatorNumber
+  WHILE SectionElevator NOT FOUND
+    FOR EACH Elevator IN Elevators
+         IF Floor IS > Lobby AND Status IS Stopped THEN
+          RETURN Elevator
+         ELSE IF Elevator.Status IS Idle THEN
+          RETURN Elevator
+         ELSE IF Elevator IS GoingUp THEN
+          DO Nothing
+       END IF
+     END FOR
+         READ SectionElevator WITH ShortestList FloorList FROM SectionElevators
+  END WHILE
+END SEQUENCE
+
+
+
+SEQUENCE AddDestinationFloorToElevatorFloorList(ElevatorNumber, Floor)
+  ADD Floor to SectionElevatorFloorList(ElevatorNumber)
+  SORT SectionElevatorFloorList(ElevatorNumber)
+  OperateElevator(ElevatorNumber)
+END SEQUENCE
+
+SEQUENCE MoveSectionElevatorToFloor (ElevatorNumber, Floor)
+   CALL SectionFloorList
+   CALL OperateSectionElevator (ElevatorNumber)
+END SEQUENCE
+
+SEQUENCE SectionFloorList(ElevatorNumber)
+  CALL FindSectionElevator(ElevatorNumber) RETURNING Elevator
+  RETURN Elevator.SectionFloorList
+END SEQUENCE
+
+SEQUENCE FindSectionElevator(ElevatorNumber)
+  FOR EACH SectionElevator IN SectionElevators
+    IF SectionElevator.number = SectionElevatorNumber
+      RETURN Elevator
+  END FOR
+END SEQUENCE
+
+SEQUENCE OperateSectionElevator (ElevatorNumber)
+  CALL FindSectionElevator(ElevatorNumber) RETURNING Elevator
+  IF SectionElevator.Status IS Idle OR Stopped
+    SectionElevator.targetFloor = NextFloorInSectionFloorList(Elevator)
+    IF SectionElevator.TargetFloor IS GreaterThan SectionElevator.CurrentFloor
+      SectionElevator.Status = GoingUp
+    ELSE
+      SectionElevator.Status = GoingDown
+
+  WHILE (SectionElevatorNotOnTargetFloor)
+    WAIT
+  END WHILE
+
+  CALL DeactivateSectionButtonFloorElevator(Section, Elevator, SectionElevator.TargetFloor)
+  CALL OpenDoors
+  CALL CloseDoors
+
+END SEQUENCE
+
+SEQUENCE OpenDoors (Section, Elevator)
+       IF Elevator IS Moving THEN
+          StayClosed
+        ELSE IF SectionElevatorCurrentFloor IS SectionRequestedFloor FROM SectionFloorList THEN
+          OpenSectionElevatorDoors
+          SET SectionElevatorDoorTimer TO 5 Seconds
+        END IF
+END SEQUENCE
+
+SEQUENCE CloseDoors (Section, Elevator)
+        WHILE SectionElevatorDoorTimer > 0 seconds
+          KeepDoorsOpen
+        END WHILE
+
+        WHILE MaximumCapacityReached IS Exceeded
+          KeepDoorsOpen
+          READ MaximumCapacityReached FROM SectionElevator
+        END WHILE
+
+        WHILE DoorObstruction IS Obstructed OR Blocked
+          CALL OpenDoors(Section, Elevator)
+          READ DoorObstruction
+        END WHILE
+
+        Close Doors
+
+  CALL  OperateSectionElevator(SectionElevator.Number)
+END SEQUENCE
+
+SEQUENCE SelectFloorFromInsideElevator(Elevator, RequestedFloor)
+    CALL ActivateInsideButtonElevator (Elevator, RequestedFloor)
+    CALL AddDestinationFloorToElevatorFloorList (Elevator, RequestedFloor)
+END SEQUENCE
+
+SEQUENCE ActivateInsideButtonElevator (Elevator)
+    CALL FindElevatorButton (Elevator) RETURNING Button
+    SET Button Active
+END SEQUENCE
+
+SEQUENCE FindElevatorButton (Elevator)
+    FOR EACH ElevatorButton IN ElevatorButtons
+        IF ElevatorFloor = ButtonFloorSelected THEN
+        RETURN ElevatorButton
+    END FOR
+END SEQUENCE
+
+SEQUENCE DeactivateButtonFloorInsideElevator(Elevator, RequestedFloor)
+    CALL FindElevatorButton (Elevator, RequestedFloor) RETURNING Button
+    SET Button Deactivate
+END SEQUENCE
+
+SEQUENCE DeactivateButtonFloorOutsideElevator(Direction, Floor)
+    CALL FindButton (Direction, floor) RETURNING Button
+    SET Button Deactivate
+END SEQUENCE

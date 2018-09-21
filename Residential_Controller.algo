@@ -1,0 +1,136 @@
+
+PSEUDO-CODE Residential
+
+SEQUENCE RequestElevatorForUser (Direction, floor)
+    CALL ActivateOutsideFloorButton(Direction, floor)
+    CALL FindBestElevatorForFloorRequest(Direction, floor) RETURNING ElevatorNumber
+    CALL AddDestinationFloorToElevatorFloorList (ElevatorNumber, Floor)
+END SEQUENCE
+
+SEQUENCE ActivateOutsideFloorButton (Direction, floor)
+    CALL FindButton (Direction, floor) RETURNING Button
+    SET Button Active
+END SEQUENCE
+
+SEQUENCE FindButton (Direction, floor)
+    FOR EACH Button IN Buttons
+        IF Floor = ButtonFloor AND Direction = ButtonDirection
+        THEN RETURN Button
+    END FOR
+END SEQUENCE
+
+SEQUENCE FindBestElevatorForFloorRequest (Direction, Floor)
+  WHILE Elevator NOT FOUND
+    FOR EACH Elevator IN Elevators
+         IF Floor IS ElevatorFloor AND Status Is Stopped AND ElevatorDirection IS Direction THEN
+          RETURN Elevator
+         ELSE IF Status IS Idle AND Floor IS ElevatorFloor THEN
+          RETURN Elevator
+         ELSE IF Direction IS GoingUp AND CurrentFloor IS Smaller THAN Floor AND ElevatorDirection IS GoingUp THEN
+          RETURN Elevator
+         ELSE IF Direction IS GoingDown AND CurrentFloor IS Greater THAN Floor AND ElevatorDirection IS GoingDown THEN
+          RETURN Elevator
+       END IF
+     END FOR
+         READ Elevator WITH Shortest FloorList FROM Elevators
+  END WHILE
+END SEQUENCE
+
+SEQUENCE AddDestinationFloorToElevatorFloorList(ElevatorNumber, Floor)
+  ADD Floor to FloorList(ElevatorNumber)
+  SORT FloorList(ElevatorNumber)
+  OperateElevator(ElevatorNumber)
+END SEQUENCE
+
+SEQUENCE MoveElevatorToFloor (ElevatorNumber, Floor)
+   CALL FloorList
+   CALL OperateElevator (ElevatorNumber)
+END SEQUENCE
+
+SEQUENCE FloorList(ElevatorNumber)
+  CALL FindElevator(ElevatorNumber) RETURNING Elevator
+  return Elevator.FloorList
+END SEQUENCE
+
+SEQUENCE FindElevator(ElevatorNumber)
+  FOR EACH Elevator IN Elevators
+    IF Elevator.number = ElevatorNumber
+      return Elevator
+  END FOR
+END SEQUENCE
+
+SEQUENCE OperateElevator (ElevatorNumber)
+  CALL FindElevator(ElevatorNumber) RETURNING Elevator
+  IF Elevator.Status IS Idle OR Stopped
+    Elevator.targetFloor = NextFloorInFloorList(Elevator)
+    IF Elevator.TargetFloor GreaterThan Elevator.CurrentFloor
+      Elevator.Status = GoingUp
+    ELSE
+      Elevator.Status = GoingDown
+
+  WHILE (ElevatorNotOnTargetFloor)
+    WAIT
+  END WHILE
+
+  CALL DeactivateButtonFloorInsideElevator(Elevator, Elevator.TargetFloor)
+  CALL DeactivateButtonFloorOutsideElevator(Direction, Floor)
+  CALL OpenDoors
+  CALL CloseDoors
+
+END SEQUENCE
+
+SEQUENCE OpenDoors (Elevator)
+       IF Elevator IS Moving THEN
+          StayClosed
+        ELSE IF ElevatorCurrentFloor IS RequestedFloor FROM FloorList THEN
+          OpenElevatorDoors
+          SET ElevatorDoorTimer TO 5 Seconds
+        END IF
+END SEQUENCE
+
+SEQUENCE CloseDoors (Elevator)
+        WHILE ElevatorDoorTimer > 0 seconds
+          KeepDoorsOpen
+        END WHILE
+
+        WHILE MaximumCapacityReached IS Exceeded
+          KeepDoorsOpen
+          READ MaximumCapacityReached FROM Elevator
+        END WHILE
+
+        WHILE DoorObstruction IS Obstructed OR Blocked
+          CALL OpenDoors(Elevator)
+          READ DoorObstruction
+        END WHILE
+
+        Close Doors
+
+  CALL  OperateElevator(Elevator.Number)
+END SEQUENCE
+
+SEQUENCE SelectFloorFromInsideElevator(Elevator, RequestedFloor)
+    CALL ActivateInsideButtonElevator (Elevator, RequestedFloor)
+    CALL AddDestinationFloorToElevatorFloorList (Elevator, RequestedFloor)
+END SEQUENCE
+
+SEQUENCE ActivateInsideButtonElevator (Elevator)
+    CALL FindElevatorButton (Elevator) RETURNING Button
+    SET Button Active
+END SEQUENCE
+
+SEQUENCE FindElevatorButton (Elevator)
+    FOR EACH ElevatorButton IN ElevatorButtons
+        IF ElevatorFloor = ButtonFloorSelected THEN
+        RETURN ElevatorButton
+    END FOR
+END SEQUENCE
+
+SEQUENCE DeactivateButtonFloorInsideElevator(Elevator, RequestedFloor)
+    CALL FindElevatorButton (Elevator, RequestedFloor) RETURNING Button
+    SET Button Deactivate
+END SEQUENCE
+
+SEQUENCE DeactivateButtonFloorOutsideElevator(Direction, Floor)
+    CALL FindButton (Direction, floor) RETURNING Button
+    SET Button Deactivate
+END SEQUENCE
