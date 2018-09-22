@@ -13,6 +13,15 @@ END SEQUENCE
 
 SEQUENCE ActivateSectionOfFloorSelected (Direction, Section, Floor)
    CALL SelectSectionFloor (Direction, Section, Floor) RETURNING Section
+   CALL FindElevatorButton (Elevator) RETURNING Button
+   SET Active
+END SEQUENCE
+
+SEQUENCE FindElevatorButton (Elevator)
+    FOR EACH ElevatorButton IN ElevatorButtons
+        IF ElevatorFloor = ButtonFloorSelected THEN
+        RETURN ElevatorButton
+    END FOR
 END SEQUENCE
 
 SEQUENCE SelectSectionFloor (Direction, Section, Floor)
@@ -51,7 +60,7 @@ END SEQUENCE
 SEQUENCE AddDestinationFloorToElevatorFloorList(ElevatorNumber, Floor)
   ADD Floor to SectionElevatorFloorList(ElevatorNumber)
   SORT SectionElevatorFloorList(ElevatorNumber)
-  OperateElevator(ElevatorNumber)
+  OperateSectionElevator(ElevatorNumber)
 END SEQUENCE
 
 SEQUENCE MoveSectionElevatorToFloor (ElevatorNumber, Floor)
@@ -65,7 +74,7 @@ SEQUENCE SectionFloorList(ElevatorNumber)
 END SEQUENCE
 
 SEQUENCE FindSectionElevator(ElevatorNumber)
-  FOR EACH SectionElevator IN SectionElevators
+  FOR EACH Elevator IN SectionElevators
     IF SectionElevator.number = SectionElevatorNumber
       RETURN Elevator
   END FOR
@@ -75,11 +84,11 @@ SEQUENCE OperateSectionElevator (ElevatorNumber)
   CALL FindSectionElevator(ElevatorNumber) RETURNING Elevator
   IF SectionElevator.Status IS Idle OR Stopped
     SectionElevator.targetFloor = NextFloorInSectionFloorList(Elevator)
-    IF SectionElevator.TargetFloor IS GreaterThan SectionElevator.CurrentFloor
+    IF SectionElevator.TargetFloor IS > Than SectionElevator.CurrentFloor
       SectionElevator.Status = GoingUp
     ELSE
       SectionElevator.Status = GoingDown
-
+     END IF
   WHILE (SectionElevatorNotOnTargetFloor)
     WAIT
   END WHILE
@@ -88,6 +97,11 @@ SEQUENCE OperateSectionElevator (ElevatorNumber)
   CALL OpenDoors
   CALL CloseDoors
 
+END SEQUENCE
+
+SEQUENCE DeactivateButtonFromSectionElevator(Elevator, RequestedFloor)
+    CALL FindElevatorButton (Elevator, RequestedFloor) RETURNING Button
+    SET Button Deactivate
 END SEQUENCE
 
 SEQUENCE OpenDoors (Section, Elevator)
@@ -117,31 +131,4 @@ SEQUENCE CloseDoors (Section, Elevator)
         Close Doors
 
   CALL  OperateSectionElevator(SectionElevator.Number)
-END SEQUENCE
-
-SEQUENCE SelectFloorFromInsideElevator(Elevator, RequestedFloor)
-    CALL ActivateInsideButtonElevator (Elevator, RequestedFloor)
-    CALL AddDestinationFloorToElevatorFloorList (Elevator, RequestedFloor)
-END SEQUENCE
-
-SEQUENCE ActivateInsideButtonElevator (Elevator)
-    CALL FindElevatorButton (Elevator) RETURNING Button
-    SET Button Active
-END SEQUENCE
-
-SEQUENCE FindElevatorButton (Elevator)
-    FOR EACH ElevatorButton IN ElevatorButtons
-        IF ElevatorFloor = ButtonFloorSelected THEN
-        RETURN ElevatorButton
-    END FOR
-END SEQUENCE
-
-SEQUENCE DeactivateButtonFloorInsideElevator(Elevator, RequestedFloor)
-    CALL FindElevatorButton (Elevator, RequestedFloor) RETURNING Button
-    SET Button Deactivate
-END SEQUENCE
-
-SEQUENCE DeactivateButtonFloorOutsideElevator(Direction, Floor)
-    CALL FindButton (Direction, floor) RETURNING Button
-    SET Button Deactivate
 END SEQUENCE

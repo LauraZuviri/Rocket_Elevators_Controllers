@@ -67,7 +67,7 @@ SEQUENCE OperateElevator (ElevatorNumber)
       Elevator.Status = GoingUp
     ELSE
       Elevator.Status = GoingDown
-
+    END IF
   WHILE (ElevatorNotOnTargetFloor)
     WAIT
   END WHILE
