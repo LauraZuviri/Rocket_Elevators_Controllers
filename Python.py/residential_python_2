@@ -1,0 +1,132 @@
+Residential_Controller
+
+floorNames = ["basement2", "basement1", "lobby", "floor2", "floor3", "floor4", "floor5", "floor6", "floor7", "floor8"]
+Number_of_floors = 10
+elevatorList = ["elevator1", "elevator2"]
+Number_of_elevators = 2
+elevators = []
+floors = []
+
+class Controller:
+       def __init__(self, number_of_floor, nb_elevators, direction):
+          self.columns = []
+          self.columns.append(column(number_of_floor, nb_elevators))
+
+       def requestElevator (self, floor_Number, wanted_direction):
+          print("I want to go ="+str(wanted_direction))
+          print(".I am on floor ="+str(floor_Number))
+          elevator = self.findBestElevator(floor_number, wanted_direction)
+          self.floorList.append(floor_number)
+          self.OperateElevator()
+
+       def operateElevator(self):
+
+
+
+       def requestFloor(self, floor_number, elevator):
+           self.floorButtons = floor_buttons
+           self.number_of_floors = number_of_floors
+           self.number_of_elvator = number_of_elevator
+
+
+       def moveUp:
+           self.moveUp = 1
+
+
+
+       def moveDown:
+           self.moveDown = -1
+
+      def openDoor:
+
+      def closeDoor:
+
+
+       def findBestElevator (self, direction, floor_number):
+          while elevator is False:
+           for elevator in self.columns[0].elevators:
+               if elevator.currentFloor is "floor_number" and elevator.status is "stopped" and elevator.direction is "goingNowhere":
+                return elevator
+               elif elevator.status is "Idle" and elevator.currentFloor is "0":
+                return elevator
+            elif direction is "goingUp" and elevator.currentFloor < "floor_number" and elevator.direction is "goingUp":
+                return elevator
+               elif direction is "goingDown" and elevator.currentFloor > "floor" and elevator.direction is "goingDown":
+                return elevator
+               else:
+                return self.elevatorWithShortestFloorList()
+
+       def elevatorWithShortestFloorList(self):
+               shortestListElevator = None
+           for elevator in self.columns[0].elevators:
+                print("elevator in elevatorWithShortestFloorList" + str(elevator.elevator_name))
+
+class Column:
+      def __init__(self, numberOfFloor, numberOfElevators):
+           for index in range (numberOfElevators):
+            self.elevators.append(elevator(index, numberOfFloor))
+           for index in range (numberOfFloor):
+               callButtons = []
+               if index is 0:
+                callButtons.append(callButton("up", index))
+               elif index is numberOfFloor -1:
+                callButtons.append(callButton("down", index))
+               else:
+                callButtons.append(callButton("up", index))
+                callButtons.append(callButton("down", index))
+
+                self.floors.append(floor(index, floorNames[index]), callButtons)
+
+class Elevator:
+    def __init__(self, elevator_name, number_of_floors):
+        self.direction = "goingNowhere"
+        self.status = "Idle"
+        self.currentFloor = 0
+        self.floorList = []
+        self.floorButtons = []
+        self.openDoorButton = openDoorButton()
+        self.closeDoorsButton = closeDoorButton()
+        self.status = door()
+
+class Floor:
+    def __init__(self, number, name, callButtons):
+        self.number = number
+        self.name = name
+        self.callButtons = callButtons
+
+class FloorButton(self):
+    def __init__(self, floor, number_of_elevator, direction):
+        self.status = []
+
+    def setButton (floor, Direction):
+        b = findButton(floor, Direction)
+        b.self.status = "active"
+
+    def findbutton(floor, direction):
+        return Button()
+
+class Door:
+    def __init__(self):
+        self.status = "closed"
+
+    def open(self):
+        self.status = 'opened'
+        print("door opened, status = " + str(self.status))
+
+    def clone(self):
+        self.status = 'closed'
+
+class CallButton:
+    def __init__(self, direction, floor):
+        self.direction = direction
+        self.floor = floor
+        self.activated = False
+
+class OpenDoorsButton:
+
+    def __init__(self):
+        self.status = "deactivated"
+
+ class CloseDoorsButton:
+    def __init__(self):
+        self.status = "deactivated"
