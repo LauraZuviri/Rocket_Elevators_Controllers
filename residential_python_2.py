@@ -4,6 +4,8 @@ elevatorList = ["elevator1", "elevator2"]
 Number_of_elevators = 2
 elevators = []
 floors = []
+ElevatorDirection = ["goingUp", "goingDown", "goingNowhere"]
+status = ["idle", "stopped", "moving"]
 
 class Controller:
     def __init__(self, number_of_floor, nb_elevators):
@@ -14,34 +16,49 @@ class Controller:
         print("I want to go = "+str(wanted_direction))
         print("I am on floor = "+str(floor_Number))
         elevator = self.findBestElevator(floor_Number, wanted_direction)
+        print("found elevator " +str(elevator.elevator_name))
         elevator.floorList.append(floor_Number)
         self.operateElevator(elevator)
         return elevator
+        self.requestElevator = []
 
     def operateElevator(self, elevator):
-        nextFloor = elevator.floorList[0]
-        if nextFloor == elevator.currentFloor:
-            elevator.openDoor()
-        elif nextFloor > elevator.currentFloor:
-            elevator.moveUp()
+        if elevator.direction == "goingUp":
+            elevator.floorList.sort()
         else:
-            elevator.moveDown()
+            elevator.floorList.sort(reverse = True)
+
+        if elevator.floorList == []:
+            elevator.status = "idle"
+        else:
+            nextFloor = elevator.floorList[0]
+            if nextFloor == elevator.currentFloor:
+                elevator.status = "stopped"
+                elevator.openDoor()
+            elif nextFloor > elevator.currentFloor:
+                elevator.status = "moving"
+                elevator.moveUp()
+            else:
+                elevator.status = "moving"
+                elevator.moveDown()
 
     def requestFloor(self, floor_number, elevator):
         elevator.activateButton(floor_number)
+        elevator.floorList.append(floor_number)
+        self.operateElevator(elevator)
 
-    def findBestElevator (self, floor_number, direction):
-        print("trying to find elevator for direction " + str(direction))
+    def findBestElevator (self, floor_number, wanted_direction):
+        print("trying to find elevator for direction " + str(wanted_direction))
         print("trying to find elevator for floor_number " + str(floor_number))
         for elevator in self.columns[0].elevators:
             print("elevator " + str(elevator.elevator_name) + ", direction " + str(elevator.direction) + ", status " + str(elevator.status))
-            if elevator.currentFloor is floor_number and elevator.status is "stopped" and elevator.direction is "goingNowhere":
+            if elevator.currentFloor == floor_number and elevator.status == "stopped":
                 return elevator
-            elif elevator.status is "Idle" and elevator.currentFloor == 0:
+            elif elevator.status == "Idle":
                 return elevator
-            elif direction is elevator.moveUp and elevator.currentFloor < floor_number and elevator.direction is "goingUp":
+            elif elevator.status == "moving" and elevator.currentFloor < floor_number and elevator.direction == "goingUp" and wanted_direction == "up":
                 return elevator
-            elif direction is elevator.moveDown and elevator.currentFloor > floor_number and elevator.direction is "goingDown":
+            elif elevator.status == "moving" and elevator.currentFloor > floor_number and elevator.direction == "goingDown" and wanted_direction == "down":
                 return elevator
             else:
                 return self.elevatorWithShortestFloorList()
@@ -49,7 +66,12 @@ class Controller:
     def elevatorWithShortestFloorList(self):
            shortestListElevator = None
            for elevator in self.columns[0].elevators:
-            print("elevator in elevatorWithShortestFloorList" + str(elevator.elevator_name))
+
+               if shortestListElevator == None or len(elevator.floorList) < len(shortestListElevator.floorList):
+                shortestListElevator = elevator
+
+                print("elevator in elevatorWithShortestFloorList " + str(shortestListElevator))
+           return shortestListElevator
 
 class Column:
     def __init__(self, numberOfFloor, numberOfElevators):
@@ -88,21 +110,28 @@ class Elevator:
 
         for index in range (nbOfFloors):
             self.floorButtons.append(FloorButton(index+1, self.elevator_name))
-            print("floor button added " + str(self.floorButtons[index].floorNumber))
 
     def moveUp(self):
-        self.status = "GoingUp"
+        print("moving elevator up")
+        self.status = "goingUp"
         nextFloor = self.floorList[0]
         while nextFloor != self.currentFloor:
             self.currentFloor = self.currentFloor + 1
 
         self.floorList.remove(nextFloor)
         self.openDoor()
+        print("done moving elevator up. on floor " + str(self.currentFloor))
 
     def moveDown(self):
-        
-       self.moveDown = -1
-       controller.operateElevator
+        print("moving elevator down")
+        self.status = "goingDown"
+        nextFloor = self.floorList[0]
+        while nextFloor != self.currentFloor:
+            self.currentFloor = self.currentFloor -1
+
+        self.floorList.remove(nextFloor)
+        self.openDoor()
+        print("done moving elevator down. on floor " + str(self.currentFloor))
 
     def openDoor(self):
         if self.status is "moving":
@@ -180,7 +209,28 @@ class CloseDoorsButton:
 
 
 controller = Controller(10, 2)
-elevator = controller.requestElevator(2, "goingUp")
+controller.columns[0].elevators[0].currentFloor = 1
+controller.columns[0].elevators[1].currentFloor = 4
+elevator = controller.requestElevator(2, "up")
+floor = controller.requestFloor(6, elevator)
+
 print("REQUEST ELEVATOR DONE")
 
-controller.requestFloor(3, elevator)
+controller = Controller(10, 2)
+controller.columns[0].elevators[0].currentFloor = 9
+controller.columns[0].elevators[1].currentFloor = 2
+elevator = controller.requestElevator(0, "up")
+floor = controller.requestFloor(4, elevator)
+elevator = controller.requestElevator(2, "up")
+floor = controller.requestFloor(3, elevator)
+elevator = controller.requestElevator(7, "down")
+floor = controller.requestFloor(1, elevator)
+
+#A User located at Floor 1 calls for elevators Originating from Basement 1 and Floor 4,
+#he gets one and gets to the Fifth floor with it'
+
+#A User located at Floor Basement 2 calls for elevators Originating from Floor 8 and Floor 1, he gets one to get to the 4th floor,
+#Simultaneously, someone at Floor 1 requests an elevator to get to 3rd floor as someone at 7th requests to go down to basement 1'
+
+#A User located at Floor 8 calls for elevators Originating from Floor 8 and Floor 1, he gets one to get to the 1st floor.
+#Simultaneously Someone at Floor 1 requests an elevator to get to Basement 1'
