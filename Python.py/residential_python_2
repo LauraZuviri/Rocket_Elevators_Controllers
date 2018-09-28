@@ -39,9 +39,9 @@ class Controller:
                 return elevator
             elif elevator.status is "Idle" and elevator.currentFloor == 0:
                 return elevator
-            elif direction is "goingUp" and elevator.currentFloor < floor_number and elevator.direction is "goingUp":
+            elif direction is elevator.moveUp and elevator.currentFloor < floor_number and elevator.direction is "goingUp":
                 return elevator
-            elif direction is "goingDown" and elevator.currentFloor > floor_number and elevator.direction is "goingDown":
+            elif direction is elevator.moveDown and elevator.currentFloor > floor_number and elevator.direction is "goingDown":
                 return elevator
             else:
                 return self.elevatorWithShortestFloorList()
@@ -96,12 +96,17 @@ class Elevator:
         while nextFloor != self.currentFloor:
             self.currentFloor = self.currentFloor + 1
 
-        self.floorList.remove(nextFloor)
-        self.openDoor()
+            self.floorList.remove(nextFloor)
+            self.openDoor()
 
     def moveDown(self):
-       self.moveDown = -1
-       controller.operateElevator
+        self.status = "GoingDown"
+        nextFloor = self.floorList[0]
+        while nextFloor != self.currentFloor:
+            self.currentFloor = self.currentFloor - 1
+
+            self.floorList.remove(nextFloor)
+            self.openDoor()
 
     def openDoor(self):
         if self.status is "moving":
@@ -122,9 +127,9 @@ class Elevator:
     def activateButton(self, floorNumber):
         print("activating floor button for floor number " + str(floorNumber))
         buttonToActivate = 0
-        for button in self.floorButtons
-            if button.floorNumber == floor_Number
-                buttonToActivate = Button
+        for button in self.floorButtons:
+            if button.floorNumber == floorNumber:
+                buttonToActivate = button
 
         buttonToActivate.status = "active"
 
