@@ -96,17 +96,13 @@ class Elevator:
         while nextFloor != self.currentFloor:
             self.currentFloor = self.currentFloor + 1
 
-            self.floorList.remove(nextFloor)
-            self.openDoor()
+        self.floorList.remove(nextFloor)
+        self.openDoor()
 
     def moveDown(self):
-        self.status = "GoingDown"
-        nextFloor = self.floorList[0]
-        while nextFloor != self.currentFloor:
-            self.currentFloor = self.currentFloor - 1
-
-            self.floorList.remove(nextFloor)
-            self.openDoor()
+        
+       self.moveDown = -1
+       controller.operateElevator
 
     def openDoor(self):
         if self.status is "moving":
