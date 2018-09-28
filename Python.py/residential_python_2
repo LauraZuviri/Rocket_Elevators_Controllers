@@ -1,5 +1,3 @@
-Residential_Controller
-
 floorNames = ["basement2", "basement1", "lobby", "floor2", "floor3", "floor4", "floor5", "floor6", "floor7", "floor8"]
 Number_of_floors = 10
 elevatorList = ["elevator1", "elevator2"]
@@ -8,85 +6,127 @@ elevators = []
 floors = []
 
 class Controller:
-       def __init__(self, number_of_floor, nb_elevators, direction):
-          self.columns = []
-          self.columns.append(column(number_of_floor, nb_elevators))
+    def __init__(self, number_of_floor, nb_elevators):
+        self.columns = []
+        self.columns.append(Column(number_of_floor, nb_elevators))
 
-       def requestElevator (self, floor_Number, wanted_direction):
-          print("I want to go ="+str(wanted_direction))
-          print(".I am on floor ="+str(floor_Number))
-          elevator = self.findBestElevator(floor_number, wanted_direction)
-          self.floorList.append(floor_number)
-          self.OperateElevator()
+    def requestElevator (self, floor_Number, wanted_direction):
+        print("I want to go = "+str(wanted_direction))
+        print("I am on floor = "+str(floor_Number))
+        elevator = self.findBestElevator(floor_Number, wanted_direction)
+        elevator.floorList.append(floor_Number)
+        self.operateElevator(elevator)
+        return elevator
 
-       def operateElevator(self):
+    def operateElevator(self, elevator):
+        nextFloor = elevator.floorList[0]
+        if nextFloor == elevator.currentFloor:
+            elevator.openDoor()
+        elif nextFloor > elevator.currentFloor:
+            elevator.moveUp()
+        else:
+            elevator.moveDown()
 
+    def requestFloor(self, floor_number, elevator):
+        elevator.activateButton(floor_number)
 
-
-       def requestFloor(self, floor_number, elevator):
-           self.floorButtons = floor_buttons
-           self.number_of_floors = number_of_floors
-           self.number_of_elvator = number_of_elevator
-
-
-       def moveUp:
-           self.moveUp = 1
-
-
-
-       def moveDown:
-           self.moveDown = -1
-
-      def openDoor:
-
-      def closeDoor:
-
-
-       def findBestElevator (self, direction, floor_number):
-          while elevator is False:
-           for elevator in self.columns[0].elevators:
-               if elevator.currentFloor is "floor_number" and elevator.status is "stopped" and elevator.direction is "goingNowhere":
+    def findBestElevator (self, floor_number, direction):
+        print("trying to find elevator for direction " + str(direction))
+        print("trying to find elevator for floor_number " + str(floor_number))
+        for elevator in self.columns[0].elevators:
+            print("elevator " + str(elevator.elevator_name) + ", direction " + str(elevator.direction) + ", status " + str(elevator.status))
+            if elevator.currentFloor is floor_number and elevator.status is "stopped" and elevator.direction is "goingNowhere":
                 return elevator
-               elif elevator.status is "Idle" and elevator.currentFloor is "0":
+            elif elevator.status is "Idle" and elevator.currentFloor == 0:
                 return elevator
-            elif direction is "goingUp" and elevator.currentFloor < "floor_number" and elevator.direction is "goingUp":
+            elif direction is "goingUp" and elevator.currentFloor < floor_number and elevator.direction is "goingUp":
                 return elevator
-               elif direction is "goingDown" and elevator.currentFloor > "floor" and elevator.direction is "goingDown":
+            elif direction is "goingDown" and elevator.currentFloor > floor_number and elevator.direction is "goingDown":
                 return elevator
-               else:
+            else:
                 return self.elevatorWithShortestFloorList()
 
-       def elevatorWithShortestFloorList(self):
-               shortestListElevator = None
+    def elevatorWithShortestFloorList(self):
+           shortestListElevator = None
            for elevator in self.columns[0].elevators:
-                print("elevator in elevatorWithShortestFloorList" + str(elevator.elevator_name))
+            print("elevator in elevatorWithShortestFloorList" + str(elevator.elevator_name))
 
 class Column:
-      def __init__(self, numberOfFloor, numberOfElevators):
-           for index in range (numberOfElevators):
-            self.elevators.append(elevator(index, numberOfFloor))
-           for index in range (numberOfFloor):
-               callButtons = []
-               if index is 0:
-                callButtons.append(callButton("up", index))
-               elif index is numberOfFloor -1:
-                callButtons.append(callButton("down", index))
-               else:
-                callButtons.append(callButton("up", index))
-                callButtons.append(callButton("down", index))
+    def __init__(self, numberOfFloor, numberOfElevators):
+        self.elevators = []
+        self.floors = []
+        for index in range (numberOfElevators):
+            self.elevators.append(Elevator(index+1, numberOfFloor))
+            print("elevator added " + str(self.elevators[index].elevator_name))
 
-                self.floors.append(floor(index, floorNames[index]), callButtons)
+        for index in range (numberOfFloor):
+            callButtons = []
+            if index is 0:
+                callButtons.append(CallButton("up", index))
+            elif index is numberOfFloor -1:
+                callButtons.append(CallButton("down", index))
+            else:
+                callButtons.append(CallButton("up", index))
+                callButtons.append(CallButton("down", index))
+
+            self.floors.append(Floor(index, floorNames[index], callButtons))
 
 class Elevator:
-    def __init__(self, elevator_name, number_of_floors):
+    def __init__(self, elevator_name, nbOfFloors):
+        self.elevator_name = elevator_name
         self.direction = "goingNowhere"
         self.status = "Idle"
         self.currentFloor = 0
         self.floorList = []
         self.floorButtons = []
-        self.openDoorButton = openDoorButton()
-        self.closeDoorsButton = closeDoorButton()
-        self.status = door()
+        self.openDoorButton = OpenDoorsButton()
+        self.closeDoorsButton = CloseDoorsButton()
+        self.door = Door()
+        self.elevatorTargetFloor = []
+        self.nextFloorInFloorList = "next"
+        self.maximumCapacity = 0
+
+        for index in range (nbOfFloors):
+            self.floorButtons.append(FloorButton(index+1, self.elevator_name))
+            print("floor button added " + str(self.floorButtons[index].floorNumber))
+
+    def moveUp(self):
+        self.status = "GoingUp"
+        nextFloor = self.floorList[0]
+        while nextFloor != self.currentFloor:
+            self.currentFloor = self.currentFloor + 1
+
+        self.floorList.remove(nextFloor)
+        self.openDoor()
+
+    def moveDown(self):
+       self.moveDown = -1
+       controller.operateElevator
+
+    def openDoor(self):
+        if self.status is "moving":
+            self.door.status is "closed"
+        elif self.currentFloor is 0:
+            self.door.status is "opened" and self.door.doorTimer is "activated"
+
+    def closeDoor(self):
+        if self.door.doorTimer > 0:
+            self.door.status = "opened"
+        elif self.maximumCapacity is 0:
+            self.door.status = "opened"
+        elif elevator.status is "blocked":
+            self.door.status = "opened"
+        else:
+            self.door.status = "closed"
+
+    def activateButton(self, floorNumber):
+        print("activating floor button for floor number " + str(floorNumber))
+        buttonToActivate = 0
+        for button in self.floorButtons
+            if button.floorNumber == floor_Number
+                buttonToActivate = Button
+
+        buttonToActivate.status = "active"
 
 class Floor:
     def __init__(self, number, name, callButtons):
@@ -94,27 +134,33 @@ class Floor:
         self.name = name
         self.callButtons = callButtons
 
-class FloorButton(self):
-    def __init__(self, floor, number_of_elevator, direction):
+class FloorButton:
+    def __init__(self, floorNumber, number_of_elevator):
+        self.floorNumber = floorNumber
+        self.number_of_elevator = number_of_elevator
         self.status = []
 
-    def setButton (floor, Direction):
+    def setButton (self, floor, Direction):
         b = findButton(floor, Direction)
         b.self.status = "active"
 
-    def findbutton(floor, direction):
+    def findbutton(self, floor, direction):
         return Button()
 
 class Door:
     def __init__(self):
-        self.status = "closed"
+        self.status = "closed", "opened"
+        self.doorTimer = 5
+    def setDoorTimer(self):
+        self.status = "activated"
 
     def open(self):
-        self.status = 'opened'
+        self.status = "opened"
         print("door opened, status = " + str(self.status))
 
-    def clone(self):
-        self.status = 'closed'
+    def close(self):
+        self.status = "closed"
+        print("door closed, status = " + str(self.status))
 
 class CallButton:
     def __init__(self, direction, floor):
@@ -127,6 +173,13 @@ class OpenDoorsButton:
     def __init__(self):
         self.status = "deactivated"
 
- class CloseDoorsButton:
+class CloseDoorsButton:
     def __init__(self):
         self.status = "deactivated"
+
+
+controller = Controller(10, 2)
+elevator = controller.requestElevator(2, "goingUp")
+print("REQUEST ELEVATOR DONE")
+
+controller.requestFloor(3, elevator)
