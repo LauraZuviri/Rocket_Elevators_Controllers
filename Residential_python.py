@@ -4,8 +4,7 @@ elevatorList = ["elevator1", "elevator2"]
 Number_of_elevators = 2
 elevators = []
 floors = []
-ElevatorDirection = ["goingUp", "goingDown", "goingNowhere"]
-status = ["idle", "stopped", "moving"]
+
 
 class Controller:
     def __init__(self, number_of_floor, nb_elevators):
@@ -70,7 +69,6 @@ class Controller:
                if shortestListElevator == None or len(elevator.floorList) < len(shortestListElevator.floorList):
                 shortestListElevator = elevator
 
-                print("elevator in elevatorWithShortestFloorList " + str(shortestListElevator))
            return shortestListElevator
 
 class Column:
